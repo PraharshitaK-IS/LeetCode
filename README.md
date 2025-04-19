@@ -1,1 +1,1 @@
-# DumbBabyMuscle
+# LeetCode Practice
