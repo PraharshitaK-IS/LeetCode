@@ -1,26 +1,25 @@
 #https://leetcode.com/problems/word-search-ii/
 
 from typing import List
-
 class TrieNode:
     def __init__(self):
         self.children = {}
-        self.word = None  # Store complete word at the end node
+        self.word = None
 
 class Solution:
-    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+    def findWords(self, board, words):
         root = TrieNode()
-
-        # Step 1: Build Trie
         for word in words:
             node = root
             for ch in word:
                 if ch not in node.children:
                     node.children[ch] = TrieNode()
                 node = node.children[ch]
-            node.word = word  # Store full word at the leaf
+            node.word = word
 
-        # Step 2: DFS function
+        m, n = len(board), len(board[0])
+        result = []
+
         def dfs(i, j, node):
             ch = board[i][j]
             if ch not in node.children:
@@ -28,18 +27,22 @@ class Solution:
             next_node = node.children[ch]
             if next_node.word:
                 result.append(next_node.word)
-                next_node.word = None  # Avoid duplicates
+                next_node.word = None  # avoid duplicates
+                # aggressively prune if this was the only path
+                if not next_node.children:
+                    node.children.pop(ch)
+                    return
 
-            board[i][j] = "#"  # Mark visited
+            board[i][j] = '#'
             for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
                 ni, nj = i + dx, j + dy
-                if 0 <= ni < len(board) and 0 <= nj < len(board[0]) and board[ni][nj] != "#":
+                if 0 <= ni < m and 0 <= nj < n and board[ni][nj] != '#':
                     dfs(ni, nj, next_node)
-            board[i][j] = ch  # Restore letter
+            board[i][j] = ch
 
-        result = []
-        for i in range(len(board)):
-            for j in range(len(board[0])):
-                dfs(i, j, root)
+        for i in range(m):
+            for j in range(n):
+                if board[i][j] in root.children:
+                    dfs(i, j, root)
 
         return result
